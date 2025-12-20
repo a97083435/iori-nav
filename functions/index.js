@@ -183,6 +183,8 @@ export async function onRequest(context) {
   let homeHideHitokoto = false;
   let homeHitokotoSize = '';
   let homeHitokotoColor = '';
+  let homeHideGithub = false;
+  let homeHideAdmin = false;
   let homeCustomFontUrl = '';
   let homeTitleFont = '';
   let homeSubtitleFont = '';
@@ -204,6 +206,13 @@ export async function onRequest(context) {
   let layoutCardBorderRadius = '12';
   let wallpaperSource = 'bing';
   let wallpaperCid360 = '36';
+  
+  let cardTitleFont = '';
+  let cardTitleSize = '';
+  let cardTitleColor = '';
+  let cardDescFont = '';
+  let cardDescSize = '';
+  let cardDescColor = '';
 
   try {
     const keys = [
@@ -212,6 +221,7 @@ export async function onRequest(context) {
         'layout_hide_subtitle', 'home_subtitle_size', 'home_subtitle_color',
         'home_hide_stats', 'home_stats_size', 'home_stats_color',
         'home_hide_hitokoto', 'home_hitokoto_size', 'home_hitokoto_color',
+        'home_hide_github', 'home_hide_admin',
         'home_custom_font_url', 'home_title_font', 'home_subtitle_font', 'home_stats_font', 'home_hitokoto_font',
         'home_site_name', 'home_site_description',
         'home_search_engine_enabled',
@@ -220,7 +230,9 @@ export async function onRequest(context) {
         'layout_enable_frosted_glass', 'layout_frosted_glass_intensity',
         'layout_enable_bg_blur', 'layout_bg_blur_intensity', 'layout_card_style',
         'layout_card_border_radius',
-        'wallpaper_source', 'wallpaper_cid_360'
+        'wallpaper_source', 'wallpaper_cid_360',
+        'card_title_font', 'card_title_size', 'card_title_color',
+        'card_desc_font', 'card_desc_size', 'card_desc_color'
     ];
     const placeholders = keys.map(() => '?').join(',');
     const { results } = await env.NAV_DB.prepare(`SELECT key, value FROM settings WHERE key IN (${placeholders})`).bind(...keys).all();
@@ -246,6 +258,9 @@ export async function onRequest(context) {
         if (row.key === 'home_hide_hitokoto') homeHideHitokoto = row.value === 'true';
         if (row.key === 'home_hitokoto_size') homeHitokotoSize = row.value;
         if (row.key === 'home_hitokoto_color') homeHitokotoColor = row.value;
+        
+        if (row.key === 'home_hide_github') homeHideGithub = (row.value === 'true' || row.value === '1');
+        if (row.key === 'home_hide_admin') homeHideAdmin = (row.value === 'true' || row.value === '1');
 
         if (row.key === 'home_custom_font_url') homeCustomFontUrl = row.value;
         if (row.key === 'home_title_font') homeTitleFont = row.value;
@@ -271,6 +286,13 @@ export async function onRequest(context) {
         if (row.key === 'layout_card_border_radius') layoutCardBorderRadius = row.value;
         if (row.key === 'wallpaper_source') wallpaperSource = row.value;
         if (row.key === 'wallpaper_cid_360') wallpaperCid360 = row.value;
+        
+        if (row.key === 'card_title_font') cardTitleFont = row.value;
+        if (row.key === 'card_title_size') cardTitleSize = row.value;
+        if (row.key === 'card_title_color') cardTitleColor = row.value;
+        if (row.key === 'card_desc_font') cardDescFont = row.value;
+        if (row.key === 'card_desc_size') cardDescSize = row.value;
+        if (row.key === 'card_desc_color') cardDescColor = row.value;
       });
     }
   } catch (e) {}
@@ -625,6 +647,7 @@ export async function onRequest(context) {
   let sidebarToggleClass = '';
   let mobileToggleVisibilityClass = 'lg:hidden';
   let githubIconHtml = '';
+  let adminIconHtml = '';
   let headerContent = verticalHeaderContent;
 
   if (layoutMenuLayout === 'horizontal') {
@@ -633,17 +656,21 @@ export async function onRequest(context) {
       sidebarToggleClass = '!hidden';
       mobileToggleVisibilityClass = 'min-[550px]:hidden';
       
-      githubIconHtml = `
-      <a href="https://slink.661388.xyz/iori-nav" target="_blank" class="fixed top-4 left-4 z-50 hidden min-[550px]:flex items-center justify-center p-2 rounded-lg bg-white/80 backdrop-blur shadow-md hover:bg-white text-gray-700 hover:text-black transition-all" title="GitHub">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
-      </a>
-      `;
+      if (!homeHideGithub) {
+          githubIconHtml = `
+          <a href="https://slink.661388.xyz/iori-nav" target="_blank" class="fixed top-4 left-4 z-50 hidden min-[550px]:flex items-center justify-center p-2 rounded-lg bg-white/80 backdrop-blur shadow-md hover:bg-white text-gray-700 hover:text-black transition-all" title="GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+          </a>
+          `;
+      }
       
-      const adminIconHtml = `
-      <a href="/admin" target="_blank" class="fixed top-4 right-4 z-50 hidden min-[550px]:flex items-center justify-center p-2 rounded-lg bg-white/80 backdrop-blur shadow-md hover:bg-white text-gray-700 hover:text-primary-600 transition-all" title="后台管理">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M7 18a5 5 0 0 1 10 0"/></path></svg>
-      </a>
-      `;
+      if (!homeHideAdmin) {
+          adminIconHtml = `
+          <a href="/admin" target="_blank" class="fixed top-4 right-4 z-50 hidden min-[550px]:flex items-center justify-center p-2 rounded-lg bg-white/80 backdrop-blur shadow-md hover:bg-white text-gray-700 hover:text-primary-600 transition-all" title="后台管理">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M7 18a5 5 0 0 1 10 0"/></path></svg>
+          </a>
+          `;
+      }
 
       headerContent = `
         <div class="min-[550px]:hidden">
@@ -655,6 +682,25 @@ export async function onRequest(context) {
         </div>
       `;
   }
+  
+  // Also handle Sidebar GitHub/Admin icons visibility in Vertical Mode
+  // If we are in vertical mode, `githubIconHtml` is empty.
+  // The sidebar content is in `public/index.html`.
+  // We need to inject a class or hide them via replacement.
+  
+  // To keep it simple and safe:
+  // I will add a new replacement for `{{SIDEBAR_GITHUB_CLASS}}` and `{{SIDEBAR_ADMIN_CLASS}}` in `public/index.html`?
+  // But I haven't modified `public/index.html` to include those placeholders.
+  // So I have to use string replacement on known HTML structure.
+  
+  // Replace sidebar GitHub link:
+  // <a href="https://slink.661388.xyz/iori-nav" ... title="GitHub">
+  // If homeHideGithub is true, replace with empty string or hidden class.
+  
+  const sidebarGithubLinkPattern = /<a href="https:\/\/slink\.661388\.xyz\/iori-nav"[^>]*title="GitHub">[\s\S]*?<\/a>/;
+  const sidebarAdminLinkPattern = /<a href="\/admin"[^>]*>[\s\S]*?后台管理[\s\S]*?<\/a>/;
+  
+  // I'll do this replacement after fetching the template.
   
   const leftTopActionHtml = `
   <div class="fixed top-4 left-4 z-50 ${mobileToggleVisibilityClass}">
@@ -676,6 +722,20 @@ export async function onRequest(context) {
   const templateResponse = await env.ASSETS.fetch(new URL('/index.html', request.url));
   let html = await templateResponse.text();
   
+  // Inject CSS to hide icons if requested (More robust than regex replacement)
+  let hideIconsCss = '<style>';
+  if (homeHideGithub) {
+      hideIconsCss += 'a[title="GitHub"] { display: none !important; }';
+  }
+  if (homeHideAdmin) {
+      hideIconsCss += 'a[href^="/admin"] { display: none !important; }';
+  }
+  hideIconsCss += '</style>';
+  
+  if (hideIconsCss !== '<style></style>') {
+      html = html.replace('</head>', hideIconsCss + '</head>');
+  }
+  
   const safeWallpaperUrl = sanitizeUrl(layoutCustomWallpaper);
   if (safeWallpaperUrl) {
       const blurStyle = layoutEnableBgBlur ? `filter: blur(${layoutBgBlurIntensity}px);` : '';
@@ -693,7 +753,10 @@ export async function onRequest(context) {
   html = html.replace('</head>', `${cardCssVars}</head>`);
 
   // 自动注入字体资源
-  const usedFonts = new Set([homeTitleFont, homeSubtitleFont, homeStatsFont, homeHitokotoFont]);
+  const usedFonts = new Set([
+      homeTitleFont, homeSubtitleFont, homeStatsFont, homeHitokotoFont,
+      cardTitleFont, cardDescFont
+  ]);
   let fontLinksHtml = '';
   
   usedFonts.forEach(font => {
@@ -710,6 +773,22 @@ export async function onRequest(context) {
 
   if (fontLinksHtml) {
       html = html.replace('</head>', `${fontLinksHtml}</head>`);
+  }
+  
+  // Inject Custom Card Fonts CSS
+  let customCardCss = '<style>';
+  if (cardTitleFont || cardTitleSize || cardTitleColor) {
+      const s = getStyleStr(cardTitleSize, cardTitleColor, cardTitleFont).replace('style="', '').replace('"', '');
+      if (s) customCardCss += `.site-title { ${s} }`;
+  }
+  if (cardDescFont || cardDescSize || cardDescColor) {
+      const s = getStyleStr(cardDescSize, cardDescColor, cardDescFont).replace('style="', '').replace('"', '');
+      if (s) customCardCss += `.site-card p { ${s} }`;
+  }
+  customCardCss += '</style>';
+  
+  if (customCardCss !== '<style></style>') {
+      html = html.replace('</head>', `${customCardCss}</head>`);
   }
 
   // Inject Layout Config for Client-side JS
